@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตู้ขายของอัตโนมัติ</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f7f7f7;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            padding: 20px;
+            background-color: #fff;
+            margin: 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-container {
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .menu-button {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 15px 25px;
+            font-size: 1.2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 10px;
+            width: 200px;
+        }
+
+        .menu-button:hover {
+            background-color: #45a049;
+        }
+
+        #qrCode {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-button {
+            background-color: #009688;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .back-button:hover {
+            background-color: #00796b;
+        }
+
+        #loadingMessage {
+            display: none;
+            font-size: 1.2rem;
+            color: #FF5733;
+            margin-top: 20px;
+        }
+
+        #ocrResult {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        #confirmFileButton {
+            display: none;
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #confirmFileButton:hover {
+            background-color: #45a049;
+        }
+
+        #exampleImage {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #exampleImage img {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+        }
+
+        select {
+            padding: 10px;
+            font-size: 1rem;
+            margin-top: 10px;
+            width: 200px;
+        }
+
+        /* Style for modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            overflow: auto;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+        }
+
+        .modal-header {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            text-align: right;
+        }
+
+        .modal-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .modal-button:hover {
+            background-color: #45a049;
+        }
+
+        .modal-close {
+            background-color: #f44336;
+        }
+
+        .modal-close:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ตู้ขายของอัตโนมัติ</h1>
+
+    <div class="menu-container">
+        <h2>เลือกสินค้าที่ต้องการ</h2>
+        <button class="menu-button" onclick="selectProduct('สินค้า 1 (ต้องยืนยันอายุ)')">สินค้า 1 (ต้องยืนยันอายุ)</button>
+        <button class="menu-button" onclick="selectProduct('สินค้า 2 (ไม่ต้องยืนยันอายุ)')">สินค้า 2 (ไม่ต้องยืนยันอายุ)</button>
+    </div>
+
+    <div id="qrCode">
+        <p>กรุณาสแกนบัตรประชาชน:</p>
+        <button class="menu-button" onclick="openFileSelection()">เลือกไฟล์</button>
+        
+        <!-- Modal สำหรับเลือกรูป -->
+        <div id="fileModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    เลือกตัวอย่างรูปภาพ
+                </div>
+                <button class="modal-button" onclick="chooseImageType('valid')">อายุผ่านเกณฑ์</button>
+                <button class="modal-button modal-close" onclick="chooseImageType('invalid')">อายุไม่ผ่านเกณฑ์</button>
+            </div>
+        </div>
+        
+        <div id="exampleImage"></div>
+        
+        <button id="confirmFileButton" onclick="confirmSelection()">ยืนยันการเลือก</button>
+        <button class="back-button" onclick="backToMenu()">กลับไปเลือกสินค้าอื่น</button>
+    </div>
+
+    <div id="loadingMessage">
+        กำลังประมวลผล... โปรดรอสักครู่
+    </div>
+
+    <div id="ocrResult"></div>
+
+    <script>
+        let selectedProduct = '';
+
+        function selectProduct(productName) {
+            selectedProduct = productName;
+            if (productName === 'สินค้า 1 (ต้องยืนยันอายุ)') {
+                document.querySelector('.menu-container').style.display = 'none'; 
+                document.getElementById('qrCode').style.display = 'block'; 
+            } else {
+                alert("คุณเลือกซื้อ " + productName + " สำเร็จแล้ว!");
+            }
+        }
+
+        function backToMenu() {
+            document.querySelector('.menu-container').style.display = 'block'; 
+            document.getElementById('qrCode').style.display = 'none'; 
+            document.getElementById('loadingMessage').style.display = 'none'; 
+            document.getElementById('ocrResult').innerHTML = ''; 
+        }
+
+        function openFileSelection() {
+            document.getElementById('fileModal').style.display = 'block'; // แสดง modal
+        }
+
+        function chooseImageType(type) {
+            const exampleImage = document.getElementById('exampleImage');
+            if (type === 'valid') {
+                exampleImage.innerHTML = '<img src="https://via.placeholder.com/100x100/4CAF50/FFFFFF?text=Valid" alt="Valid Example">';
+            } else {
+                exampleImage.innerHTML = '<img src="https://via.placeholder.com/100x100/FF5733/FFFFFF?text=Invalid" alt="Invalid Example">';
+            }
+            document.getElementById('fileModal').style.display = 'none'; // ซ่อน modal
+            document.getElementById('confirmFileButton').style.display = 'block'; // แสดงปุ่มยืนยัน
+        }
+
+        function confirmSelection() {
+            const imageType = document.getElementById('exampleImage').innerHTML.includes("Valid") ? "อายุผ่านเกณฑ์" : "อายุไม่ผ่านเกณฑ์";
+            showOCRResult("ผลลัพธ์: " + imageType);
+
+            // แสดงข้อความ alert ตามผลลัพธ์
+            if (imageType === "อายุผ่านเกณฑ์") {
+                alert("คุณเลือกซื้อ " + selectedProduct + " สำเร็จแล้ว!");
+            } else {
+                alert("คุณอายุไม่ถึงเกณฑ์ ไม่สามารถซื้อสินค้าได้");
+            }
+        }
+
+        function showOCRResult(message) {
+            document.getElementById('ocrResult').innerHTML = message;
+            document.getElementById('loadingMessage').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
